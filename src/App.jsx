@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen,
@@ -16,8 +16,10 @@ import {
   ChevronRight,
   RotateCcw,
   Target,
+  Timer,
+  Award,
+  ClipboardCheck,
 } from "lucide-react";
-import "./App.css";
 
 function Card({ children, className = "" }) {
   return <div className={`rounded-3xl bg-white shadow-xl ${className}`}>{children}</div>;
@@ -43,7 +45,6 @@ const philosophers = [
   {
     id: "kant",
     name: "Immanuel Kant",
-    period: "Ilustración alemana",
     current: "Idealismo trascendental",
     pau: "Muy frecuente en PAU",
     color: "from-indigo-100 to-slate-100",
@@ -55,7 +56,6 @@ const philosophers = [
   {
     id: "platon",
     name: "Platón",
-    period: "Filosofía antigua",
     current: "Idealismo / dualismo ontológico",
     pau: "Frecuente en PAU",
     color: "from-amber-100 to-orange-50",
@@ -67,7 +67,6 @@ const philosophers = [
   {
     id: "tomas",
     name: "Tomás de Aquino",
-    period: "Filosofía medieval",
     current: "Escolástica cristiana",
     pau: "Frecuente según comunidad autónoma",
     color: "from-emerald-100 to-lime-50",
@@ -79,7 +78,6 @@ const philosophers = [
   {
     id: "nietzsche",
     name: "Friedrich Nietzsche",
-    period: "Filosofía contemporánea",
     current: "Vitalismo / crítica de la moral",
     pau: "Muy frecuente en PAU",
     color: "from-rose-100 to-red-50",
@@ -190,6 +188,7 @@ function ProgressBar({ value }) {
 export default function App() {
   const [tab, setTab] = useState("comentario");
   const [selectedText, setSelectedText] = useState(texts[0]);
+
   const [answers, setAnswers] = useState({
     theme: "",
     thesis: "",
@@ -197,22 +196,96 @@ export default function App() {
     explanation: "",
     critique: "",
   });
+
   const [showSolution, setShowSolution] = useState(false);
-  const [xp, setXp] = useState(260);
-  const [streak] = useState(4);
+
+  const [xp, setXp] = useState(() => {
+    const saved = localStorage.getItem("xp");
+    return saved ? Number(saved) : 260;
+  });
+
+  const [streak, setStreak] = useState(() => {
+    const saved = localStorage.getItem("streak");
+    return saved ? Number(saved) : 4;
+  });
+
   const [quizIndex, setQuizIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [quizDone, setQuizDone] = useState(false);
 
+  const [examStarted, setExamStarted] = useState(false);
+  const [examFinished, setExamFinished] = useState(false);
+  const [examTime, setExamTime] = useState(900);
+  const [examText, setExamText] = useState(texts[1]);
+  const [examAnswer, setExamAnswer] = useState("");
+
   const level = Math.floor(xp / 150) + 1;
   const progress = xp % 150;
   const currentQuestion = quizQuestions[quizIndex];
+
+  useEffect(() => {
+    localStorage.setItem("xp", xp);
+  }, [xp]);
+
+  useEffect(() => {
+    localStorage.setItem("streak", streak);
+  }, [streak]);
+
+  useEffect(() => {
+    if (!examStarted || examFinished) return;
+
+    const timer = setInterval(() => {
+      setExamTime((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setExamFinished(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [examStarted, examFinished]);
 
   const commentScore = useMemo(() => {
     const fields = Object.values(answers);
     const filled = fields.filter((v) => v.trim().length > 25).length;
     return Math.round((filled / fields.length) * 100);
   }, [answers]);
+
+  const examScore = useMemo(() => {
+    const words = examAnswer.trim().split(/\s+/).filter(Boolean).length;
+    if (words > 300) return 10;
+    if (words > 220) return 8;
+    if (words > 150) return 6;
+    if (words > 80) return 4;
+    if (words > 30) return 2;
+    return 0;
+  }, [examAnswer]);
+
+  const achievements = [
+    {
+      name: "Primer comentario",
+      unlocked: xp >= 300,
+      icon: ScrollText,
+    },
+    {
+      name: "Aprendiz kantiano",
+      unlocked: xp >= 450,
+      icon: Brain,
+    },
+    {
+      name: "Racha filosófica",
+      unlocked: streak >= 4,
+      icon: Flame,
+    },
+    {
+      name: "Nivel PAU",
+      unlocked: level >= 4,
+      icon: Trophy,
+    },
+  ];
 
   const gainXP = (amount) => {
     setXp((prev) => prev + amount);
@@ -232,6 +305,7 @@ export default function App() {
   const submitQuiz = () => {
     if (selectedOption === null) return;
     setQuizDone(true);
+
     if (selectedOption === currentQuestion.answer) {
       gainXP(30);
     }
@@ -243,10 +317,35 @@ export default function App() {
     setQuizIndex((prev) => (prev + 1) % quizQuestions.length);
   };
 
+  const startExam = () => {
+    const randomText = texts[Math.floor(Math.random() * texts.length)];
+    setExamText(randomText);
+    setExamAnswer("");
+    setExamTime(900);
+    setExamStarted(true);
+    setExamFinished(false);
+  };
+
+  const finishExam = () => {
+    setExamFinished(true);
+    gainXP(examScore * 10);
+  };
+
+  const resetProgress = () => {
+    setXp(260);
+    setStreak(4);
+    localStorage.removeItem("xp");
+    localStorage.removeItem("streak");
+  };
+
+  const minutes = Math.floor(examTime / 60);
+  const seconds = examTime % 60;
+
   const nav = [
     { id: "comentario", label: "Comentario", icon: ScrollText },
     { id: "filosofos", label: "Filósofos", icon: BookOpen },
     { id: "retos", label: "Retos PAU", icon: Gamepad2 },
+    { id: "examen", label: "Modo examen", icon: ClipboardCheck },
     { id: "progreso", label: "Progreso", icon: Trophy },
   ];
 
@@ -259,12 +358,14 @@ export default function App() {
               <GraduationCap className="h-5 w-5" />
               Filosofía PAU · 2.º Bachillerato
             </div>
+
             <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
               Aula Filosófica Quest
             </h1>
+
             <p className="mt-3 max-w-2xl text-base text-slate-600 md:text-lg">
               Aprende filósofos, corrientes y comentario de texto con misiones, puntos,
-              niveles y feedback inmediato.
+              niveles, logros y simulacros PAU.
             </p>
           </motion.div>
 
@@ -275,6 +376,7 @@ export default function App() {
                   <p className="text-sm text-slate-500">Nivel actual</p>
                   <p className="text-3xl font-bold">Nivel {level}</p>
                 </div>
+
                 <div className="flex gap-2">
                   <Badge>
                     <Flame className="mr-1 inline h-3 w-3" /> {streak} días
@@ -284,7 +386,9 @@ export default function App() {
                   </Badge>
                 </div>
               </div>
+
               <ProgressBar value={(progress / 150) * 100} />
+
               <p className="mt-2 text-xs text-slate-500">
                 {150 - progress} XP para el siguiente nivel
               </p>
@@ -292,9 +396,10 @@ export default function App() {
           </Card>
         </header>
 
-        <nav className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <nav className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
           {nav.map((item) => {
             const Icon = item.icon;
+
             return (
               <Button
                 key={item.id}
@@ -361,6 +466,7 @@ export default function App() {
                         Completa los pasos y desbloquea la solución modelo.
                       </p>
                     </div>
+
                     <Badge>
                       <Target className="mr-1 inline h-3 w-3" />
                       {commentScore}% completado
@@ -381,16 +487,8 @@ export default function App() {
                       ["theme", "1. Tema", "¿De qué problema filosófico trata el texto?"],
                       ["thesis", "2. Tesis", "¿Qué defiende el autor?"],
                       ["concepts", "3. Conceptos clave", "Incluye vocabulario técnico."],
-                      [
-                        "explanation",
-                        "4. Explicación",
-                        "Relaciona el texto con la teoría del autor.",
-                      ],
-                      [
-                        "critique",
-                        "5. Valoración crítica",
-                        "Compara con otro autor o problema actual.",
-                      ],
+                      ["explanation", "4. Explicación", "Relaciona el texto con la teoría del autor."],
+                      ["critique", "5. Valoración crítica", "Compara con otro autor o problema actual."],
                     ].map(([key, label, placeholder]) => (
                       <label
                         key={key}
@@ -444,16 +542,20 @@ export default function App() {
                         <CheckCircle2 className="mr-2 h-5 w-5" />
                         Solución modelo
                       </h3>
+
                       <p>
                         <strong>Tema:</strong> {selectedText.theme}
                       </p>
+
                       <p className="mt-2">
                         <strong>Tesis:</strong> {selectedText.thesis}
                       </p>
+
                       <p className="mt-2">
                         <strong>Conceptos:</strong>{" "}
                         {selectedText.concepts.join(", ")}.
                       </p>
+
                       <p className="mt-2">
                         <strong>Explicación:</strong> {selectedText.solution}
                       </p>
@@ -482,11 +584,15 @@ export default function App() {
                       <Brain className="h-8 w-8" />
                       <Badge>{p.pau}</Badge>
                     </div>
+
                     <h2 className="text-2xl font-bold">{p.name}</h2>
+
                     <p className="mt-1 text-sm font-semibold text-slate-600">
                       {p.current}
                     </p>
+
                     <p className="mt-3 text-sm text-slate-700">{p.summary}</p>
+
                     <div className="mt-4">
                       <p className="mb-2 text-sm font-bold">Conceptos PAU</p>
                       <div className="flex flex-wrap gap-2">
@@ -495,6 +601,7 @@ export default function App() {
                         ))}
                       </div>
                     </div>
+
                     <div className="mt-4 rounded-2xl bg-white/60 p-3 text-sm">
                       <strong>Obras:</strong> {p.works.join(" · ")}
                     </div>
@@ -526,6 +633,7 @@ export default function App() {
 
                   <div className="rounded-2xl bg-slate-100 p-5">
                     <p className="text-lg font-bold">{currentQuestion.q}</p>
+
                     <div className="mt-4 grid gap-3">
                       {currentQuestion.options.map((option, idx) => {
                         const isCorrect = idx === currentQuestion.answer;
@@ -561,6 +669,7 @@ export default function App() {
                     <Button onClick={submitQuiz} className="bg-slate-900 text-white">
                       Comprobar
                     </Button>
+
                     <Button
                       onClick={nextQuiz}
                       className="border border-slate-300 bg-white text-slate-800"
@@ -582,6 +691,7 @@ export default function App() {
                           Incorrecto
                         </p>
                       )}
+
                       <p className="mt-2 text-sm text-slate-600">
                         {currentQuestion.explanation}
                       </p>
@@ -612,7 +722,131 @@ export default function App() {
                           <CheckCircle2 className="h-5 w-5 text-slate-500" />
                           <span className="font-medium">{mission}</span>
                         </div>
+
                         <Badge>{reward}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.section>
+          )}
+
+          {tab === "examen" && (
+            <motion.section
+              key="examen"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              className="grid gap-5 lg:grid-cols-[1fr_.7fr]"
+            >
+              <Card>
+                <CardContent className="p-6">
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <h2 className="flex items-center text-2xl font-bold">
+                        <ClipboardCheck className="mr-2 h-7 w-7" />
+                        Simulacro PAU
+                      </h2>
+                      <p className="text-sm text-slate-500">
+                        Redacta un comentario completo en tiempo limitado.
+                      </p>
+                    </div>
+
+                    <Badge>
+                      <Timer className="mr-1 inline h-3 w-3" />
+                      {minutes}:{seconds.toString().padStart(2, "0")}
+                    </Badge>
+                  </div>
+
+                  {!examStarted ? (
+                    <div className="rounded-2xl bg-slate-100 p-5">
+                      <p className="mb-4 text-slate-700">
+                        El modo examen genera un texto aleatorio y te permite practicar
+                        como en una prueba real.
+                      </p>
+
+                      <Button onClick={startExam} className="bg-slate-900 text-white">
+                        Empezar simulacro
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mb-5 rounded-2xl bg-slate-100 p-4">
+                        <p className="mb-2 text-sm font-semibold text-slate-500">
+                          {examText.philosopher} · {examText.work}
+                        </p>
+                        <p className="text-lg font-medium leading-relaxed">
+                          “{examText.quote}”
+                        </p>
+                      </div>
+
+                      <textarea
+                        value={examAnswer}
+                        onChange={(e) => setExamAnswer(e.target.value)}
+                        disabled={examFinished}
+                        placeholder="Redacta aquí tu comentario completo: presentación, tema, tesis, explicación, contexto y valoración crítica."
+                        className="min-h-80 w-full rounded-2xl border border-slate-200 bg-white p-4 text-sm outline-none focus:border-slate-900"
+                      />
+
+                      <div className="mt-5 flex flex-wrap gap-3">
+                        <Button
+                          onClick={finishExam}
+                          disabled={examFinished}
+                          className="bg-slate-900 text-white"
+                        >
+                          Finalizar examen
+                        </Button>
+
+                        <Button
+                          onClick={startExam}
+                          className="border border-slate-300 bg-white text-slate-800"
+                        >
+                          Nuevo simulacro
+                        </Button>
+                      </div>
+                    </>
+                  )}
+
+                  {examFinished && (
+                    <div className="mt-5 rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
+                      <h3 className="mb-2 flex items-center font-bold text-indigo-900">
+                        <Award className="mr-2 h-5 w-5" />
+                        Resultado del simulacro
+                      </h3>
+
+                      <p>
+                        Nota aproximada: <strong>{examScore}/10</strong>
+                      </p>
+
+                      <p className="mt-2 text-sm text-slate-700">
+                        La puntuación se calcula de forma orientativa por extensión.
+                        En una versión avanzada se podría corregir con rúbrica por tema,
+                        tesis, conceptos, contexto y valoración crítica.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="mb-4 text-2xl font-bold">Rúbrica PAU</h2>
+
+                  <div className="space-y-3">
+                    {[
+                      ["Presentación del autor y obra", "2 puntos"],
+                      ["Tema y tesis", "2 puntos"],
+                      ["Explicación filosófica", "3 puntos"],
+                      ["Conceptos técnicos", "2 puntos"],
+                      ["Valoración crítica", "1 punto"],
+                    ].map(([item, points]) => (
+                      <div
+                        key={item}
+                        className="flex items-center justify-between rounded-2xl bg-slate-100 p-4"
+                      >
+                        <span className="font-medium">{item}</span>
+                        <Badge>{points}</Badge>
                       </div>
                     ))}
                   </div>
@@ -638,10 +872,12 @@ export default function App() {
                       <p className="text-sm text-slate-500">XP total</p>
                       <p className="text-4xl font-bold">{xp}</p>
                     </div>
+
                     <div className="rounded-3xl bg-slate-100 p-5">
                       <p className="text-sm text-slate-500">Nivel</p>
                       <p className="text-4xl font-bold">{level}</p>
                     </div>
+
                     <div className="rounded-3xl bg-slate-100 p-5">
                       <p className="text-sm text-slate-500">Racha</p>
                       <p className="text-4xl font-bold">{streak}</p>
@@ -662,44 +898,89 @@ export default function App() {
                           <span>{label}</span>
                           <span>{value}%</span>
                         </div>
+
                         <ProgressBar value={value} />
                       </div>
                     ))}
                   </div>
+
+                  <Button onClick={resetProgress} className="mt-4 bg-red-500 text-white">
+                    Reiniciar progreso
+                  </Button>
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardContent className="p-6">
-                  <h2 className="mb-4 flex items-center text-2xl font-bold">
-                    <Users className="mr-2 h-6 w-6" />
-                    Ranking aula
-                  </h2>
+              <div className="space-y-5">
+                <Card>
+                  <CardContent className="p-6">
+                    <h2 className="mb-4 flex items-center text-2xl font-bold">
+                      <Users className="mr-2 h-6 w-6" />
+                      Ranking aula
+                    </h2>
 
-                  <div className="space-y-3">
-                    {[
-                      ["Lucía", 620],
-                      ["Marcos", 575],
-                      ["Tú", xp],
-                      ["Aitana", 240],
-                    ]
-                      .sort((a, b) => b[1] - a[1])
-                      .map(([name, points], idx) => (
-                        <div
-                          key={name}
-                          className={`flex items-center justify-between rounded-2xl p-3 ${
-                            name === "Tú" ? "bg-indigo-100" : "bg-slate-100"
-                          }`}
-                        >
-                          <span className="font-semibold">
-                            #{idx + 1} {name}
-                          </span>
-                          <Badge>{points} XP</Badge>
-                        </div>
-                      ))}
-                  </div>
-                </CardContent>
-              </Card>
+                    <div className="space-y-3">
+                      {[
+                        ["Lucía", 620],
+                        ["Marcos", 575],
+                        ["Tú", xp],
+                        ["Aitana", 240],
+                      ]
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([name, points], idx) => (
+                          <div
+                            key={name}
+                            className={`flex items-center justify-between rounded-2xl p-3 ${
+                              name === "Tú" ? "bg-indigo-100" : "bg-slate-100"
+                            }`}
+                          >
+                            <span className="font-semibold">
+                              #{idx + 1} {name}
+                            </span>
+
+                            <Badge>{points} XP</Badge>
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <h2 className="mb-4 flex items-center text-2xl font-bold">
+                      <Award className="mr-2 h-6 w-6" />
+                      Logros
+                    </h2>
+
+                    <div className="space-y-3">
+                      {achievements.map((achievement) => {
+                        const Icon = achievement.icon;
+
+                        return (
+                          <div
+                            key={achievement.name}
+                            className={`flex items-center justify-between rounded-2xl p-3 ${
+                              achievement.unlocked
+                                ? "bg-emerald-100 text-emerald-900"
+                                : "bg-slate-100 text-slate-400"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <Icon className="h-5 w-5" />
+                              <span className="font-semibold">{achievement.name}</span>
+                            </div>
+
+                            {achievement.unlocked ? (
+                              <CheckCircle2 className="h-5 w-5" />
+                            ) : (
+                              <XCircle className="h-5 w-5" />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </motion.section>
           )}
         </AnimatePresence>
