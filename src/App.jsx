@@ -19,6 +19,7 @@ import {
   Timer,
   Award,
   ClipboardCheck,
+  Scale,
 } from "lucide-react";
 
 function Card({ children, className = "" }) {
@@ -41,130 +42,6 @@ function Button({ children, onClick, className = "", disabled = false }) {
   );
 }
 
-const philosophers = [
-  {
-    id: "kant",
-    name: "Immanuel Kant",
-    current: "Idealismo trascendental",
-    pau: "Muy frecuente en PAU",
-    color: "from-indigo-100 to-slate-100",
-    concepts: ["juicio reflexionante", "belleza", "sensus communis", "finalidad sin fin"],
-    works: ["Crítica de la razón pura", "Crítica de la razón práctica", "Crítica de la facultad de juzgar"],
-    summary:
-      "Kant intenta explicar cómo son posibles el conocimiento, la moral y la experiencia estética. En la Crítica del Juicio, la facultad de juzgar actúa como puente entre naturaleza y libertad.",
-  },
-  {
-    id: "platon",
-    name: "Platón",
-    current: "Idealismo / dualismo ontológico",
-    pau: "Frecuente en PAU",
-    color: "from-amber-100 to-orange-50",
-    concepts: ["mundo sensible", "mundo inteligible", "Idea de Bien", "reminiscencia"],
-    works: ["República", "Fedón", "Fedro"],
-    summary:
-      "Platón defiende que la realidad verdadera es inteligible y que el conocimiento consiste en elevarse desde lo sensible hacia las Ideas.",
-  },
-  {
-    id: "tomas",
-    name: "Tomás de Aquino",
-    current: "Escolástica cristiana",
-    pau: "Frecuente según comunidad autónoma",
-    color: "from-emerald-100 to-lime-50",
-    concepts: ["cinco vías", "ley natural", "acto y potencia", "fe y razón"],
-    works: ["Suma Teológica", "Suma contra gentiles"],
-    summary:
-      "Tomás integra el aristotelismo con la teología cristiana, defendiendo la compatibilidad entre razón filosófica y fe revelada.",
-  },
-  {
-    id: "nietzsche",
-    name: "Friedrich Nietzsche",
-    current: "Vitalismo / crítica de la moral",
-    pau: "Muy frecuente en PAU",
-    color: "from-rose-100 to-red-50",
-    concepts: ["nihilismo", "superhombre", "voluntad de poder", "muerte de Dios"],
-    works: ["Así habló Zaratustra", "Genealogía de la moral", "Más allá del bien y del mal"],
-    summary:
-      "Nietzsche critica la tradición occidental, la moral cristiana y la metafísica, proponiendo una afirmación vital de la existencia.",
-  },
-];
-
-const texts = [
-  {
-    id: "kant1",
-    philosopher: "Immanuel Kant",
-    work: "Crítica de la facultad de juzgar, §1 y §5",
-    title: "El juicio de gusto no es conocimiento",
-    difficulty: "Media",
-    quote:
-      "El juicio de gusto no es, pues, un juicio de conocimiento; no es lógico, sino estético. El gusto es la facultad de juzgar un objeto mediante una satisfacción sin ningún interés.",
-    theme: "La diferencia entre juicio estético y juicio de conocimiento.",
-    thesis:
-      "El juicio de gusto no describe objetivamente el objeto, sino que expresa una satisfacción subjetiva y desinteresada.",
-    concepts: ["juicio de gusto", "satisfacción desinteresada", "estético", "subjetividad"],
-    solution:
-      "Kant sostiene que llamar bello a algo no equivale a conocerlo científicamente. El juicio estético no se funda en conceptos, sino en el sentimiento de placer producido por el libre juego de imaginación y entendimiento. Por eso es subjetivo, aunque aspire a ser compartido.",
-  },
-  {
-    id: "kant2",
-    philosopher: "Immanuel Kant",
-    work: "Crítica de la facultad de juzgar, §6 y §8",
-    title: "Universalidad sin concepto",
-    difficulty: "Alta",
-    quote:
-      "Lo bello es lo que place universalmente sin concepto. Quien declara bella una cosa exige la aprobación de todos.",
-    theme: "La paradoja de la universalidad estética.",
-    thesis:
-      "El juicio de gusto pretende validez universal, aunque no pueda demostrarla mediante conceptos objetivos.",
-    concepts: ["universalidad subjetiva", "sensus communis", "gusto", "concepto"],
-    solution:
-      "El juicio estético no es una opinión privada como el simple agrado, porque quien dice que algo es bello espera que otros lo reconozcan. Pero tampoco es una verdad científica demostrable. La solución kantiana es el sensus communis: una comunidad de facultades compartidas por los sujetos racionales.",
-  },
-  {
-    id: "kant3",
-    philosopher: "Immanuel Kant",
-    work: "Crítica de la facultad de juzgar, §10 y §11",
-    title: "Finalidad sin fin",
-    difficulty: "Alta",
-    quote:
-      "La belleza es la forma de la finalidad de un objeto en cuanto es percibida en él sin representación de un fin.",
-    theme: "La forma finalista de lo bello.",
-    thesis:
-      "Lo bello parece organizado como si tuviera un propósito, aunque no podamos asignarle un fin concreto.",
-    concepts: ["finalidad sin fin", "forma", "juicio reflexionante", "belleza"],
-    solution:
-      "Para Kant, lo bello produce la impresión de que sus partes encajan armónicamente, como si respondieran a un plan. Sin embargo, ese plan no es una función práctica ni un concepto científico. Por eso habla de finalidad sin fin.",
-  },
-];
-
-const quizQuestions = [
-  {
-    q: "Para Kant, el juicio de gusto es...",
-    options: ["un juicio lógico", "un juicio de conocimiento", "un juicio estético", "una demostración científica"],
-    answer: 2,
-    explanation:
-      "El juicio de gusto es estético porque se refiere al sentimiento de placer o displacer, no al conocimiento del objeto.",
-  },
-  {
-    q: "¿Qué significa ‘finalidad sin fin’ en Kant?",
-    options: [
-      "Que todo arte debe tener utilidad moral",
-      "Que algo parece organizado con sentido, pero sin fin concreto",
-      "Que la belleza depende de la religión",
-      "Que el gusto es completamente privado",
-    ],
-    answer: 1,
-    explanation:
-      "Lo bello parece tener una organización finalista, aunque no podamos señalar una función o finalidad determinada.",
-  },
-  {
-    q: "¿Qué concepto permite explicar la universalidad subjetiva del gusto?",
-    options: ["imperativo categórico", "sensus communis", "mundo inteligible", "voluntad de poder"],
-    answer: 1,
-    explanation:
-      "El sensus communis aestheticus permite pensar una comunidad de facultades compartidas.",
-  },
-];
-
 function Badge({ children }) {
   return (
     <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-medium text-slate-700 shadow-sm">
@@ -184,6 +61,295 @@ function ProgressBar({ value }) {
     </div>
   );
 }
+
+const philosophers = [
+  {
+    id: "platon",
+    name: "Platón",
+    current: "Idealismo / dualismo ontológico",
+    pau: "Muy frecuente en PAU",
+    color: "from-amber-100 to-orange-50",
+    concepts: ["Ideas", "mundo sensible", "mundo inteligible", "Idea de Bien", "alma"],
+    works: ["República", "Fedón", "Fedro"],
+    summary:
+      "La realidad verdadera pertenece al mundo inteligible de las Ideas. La educación filosófica permite ascender desde la apariencia sensible hasta la Idea de Bien.",
+  },
+  {
+    id: "aristoteles",
+    name: "Aristóteles",
+    current: "Realismo / teleologismo",
+    pau: "Muy frecuente en PAU",
+    color: "from-yellow-100 to-stone-50",
+    concepts: ["sustancia", "acto y potencia", "causas", "felicidad", "virtud"],
+    works: ["Metafísica", "Ética a Nicómaco", "Política"],
+    summary:
+      "Critica el dualismo platónico y sitúa la realidad en las sustancias concretas. Explica la naturaleza mediante causas, finalidad y desarrollo hacia la perfección.",
+  },
+  {
+    id: "agustin",
+    name: "San Agustín",
+    current: "Cristianismo platónico",
+    pau: "Habitual en algunas comunidades",
+    color: "from-purple-100 to-indigo-50",
+    concepts: ["interioridad", "Dios", "verdad", "iluminación", "ciudad de Dios"],
+    works: ["Confesiones", "La ciudad de Dios"],
+    summary:
+      "Integra el cristianismo con elementos platónicos. La verdad se encuentra en el interior del alma, iluminada por Dios.",
+  },
+  {
+    id: "tomas",
+    name: "Tomás de Aquino",
+    current: "Escolástica aristotélica",
+    pau: "Muy frecuente en PAU",
+    color: "from-emerald-100 to-lime-50",
+    concepts: ["cinco vías", "ley natural", "acto y potencia", "esencia y existencia"],
+    works: ["Suma Teológica", "Suma contra gentiles"],
+    summary:
+      "Une cristianismo y aristotelismo. Defiende la compatibilidad entre razón y fe, y formula las cinco vías para demostrar racionalmente la existencia de Dios.",
+  },
+  {
+    id: "descartes",
+    name: "René Descartes",
+    current: "Racionalismo",
+    pau: "Muy frecuente en PAU",
+    color: "from-blue-100 to-cyan-50",
+    concepts: ["duda metódica", "cogito", "ideas innatas", "dualismo", "método"],
+    works: ["Discurso del método", "Meditaciones metafísicas"],
+    summary:
+      "Busca una verdad absolutamente segura mediante la duda metódica. El cogito se convierte en fundamento del conocimiento.",
+  },
+  {
+    id: "hume",
+    name: "David Hume",
+    current: "Empirismo",
+    pau: "Frecuente en PAU",
+    color: "from-sky-100 to-slate-50",
+    concepts: ["impresiones", "ideas", "causalidad", "costumbre", "escepticismo"],
+    works: ["Tratado de la naturaleza humana", "Investigación sobre el entendimiento humano"],
+    summary:
+      "Reduce el conocimiento a la experiencia. Critica la causalidad como conexión necesaria y la entiende como hábito o costumbre.",
+  },
+  {
+    id: "rousseau",
+    name: "Jean-Jacques Rousseau",
+    current: "Contractualismo / Ilustración crítica",
+    pau: "Frecuente en PAU",
+    color: "from-green-100 to-teal-50",
+    concepts: ["estado de naturaleza", "contrato social", "voluntad general", "libertad"],
+    works: ["El contrato social", "Discurso sobre la desigualdad"],
+    summary:
+      "Critica la desigualdad social y defiende que la legitimidad política debe basarse en la voluntad general.",
+  },
+  {
+    id: "kant",
+    name: "Immanuel Kant",
+    current: "Idealismo trascendental",
+    pau: "Muy frecuente en PAU",
+    color: "from-indigo-100 to-slate-100",
+    concepts: ["a priori", "fenómeno", "noúmeno", "imperativo categórico", "juicio reflexionante"],
+    works: ["Crítica de la razón pura", "Crítica de la razón práctica", "Crítica de la facultad de juzgar"],
+    summary:
+      "Estudia las condiciones de posibilidad del conocimiento, la moral y el juicio estético. En la Crítica del Juicio, la facultad de juzgar media entre naturaleza y libertad.",
+  },
+  {
+    id: "marx",
+    name: "Karl Marx",
+    current: "Materialismo histórico",
+    pau: "Muy frecuente en PAU",
+    color: "from-red-100 to-orange-50",
+    concepts: ["alienación", "ideología", "lucha de clases", "infraestructura", "plusvalía"],
+    works: ["Manuscritos económico-filosóficos", "El capital", "La ideología alemana"],
+    summary:
+      "Analiza la sociedad desde las condiciones materiales de producción. Critica el capitalismo por generar explotación y alienación.",
+  },
+  {
+    id: "nietzsche",
+    name: "Friedrich Nietzsche",
+    current: "Vitalismo / crítica de la moral",
+    pau: "Muy frecuente en PAU",
+    color: "from-rose-100 to-red-50",
+    concepts: ["nihilismo", "muerte de Dios", "superhombre", "voluntad de poder", "eterno retorno"],
+    works: ["Así habló Zaratustra", "Genealogía de la moral", "Más allá del bien y del mal"],
+    summary:
+      "Critica la moral tradicional, la metafísica y el cristianismo. Propone una afirmación creadora de la vida frente al nihilismo.",
+  },
+  {
+    id: "ortega",
+    name: "Ortega y Gasset",
+    current: "Raciovitalismo",
+    pau: "Frecuente en PAU",
+    color: "from-orange-100 to-yellow-50",
+    concepts: ["yo y circunstancia", "razón vital", "perspectivismo", "vida", "masa"],
+    works: ["Meditaciones del Quijote", "La rebelión de las masas", "El tema de nuestro tiempo"],
+    summary:
+      "Defiende que la vida humana es la realidad radical. La razón debe entenderse como razón vital, situada en una circunstancia concreta.",
+  },
+  {
+    id: "arendt",
+    name: "Hannah Arendt",
+    current: "Filosofía política contemporánea",
+    pau: "Cada vez más frecuente",
+    color: "from-violet-100 to-fuchsia-50",
+    concepts: ["totalitarismo", "acción", "pluralidad", "banalidad del mal", "espacio público"],
+    works: ["Los orígenes del totalitarismo", "La condición humana", "Eichmann en Jerusalén"],
+    summary:
+      "Analiza el totalitarismo, la acción política y la responsabilidad. La banalidad del mal muestra cómo el mal puede surgir de la obediencia acrítica.",
+  },
+];
+
+const texts = [
+  {
+    id: "kant1",
+    philosopher: "Immanuel Kant",
+    work: "Crítica de la facultad de juzgar",
+    title: "El juicio de gusto no es conocimiento",
+    difficulty: "Media",
+    quote:
+      "El juicio de gusto no es un juicio de conocimiento; no es lógico, sino estético.",
+    theme: "La diferencia entre juicio estético y juicio de conocimiento.",
+    thesis:
+      "El juicio de gusto no describe objetivamente el objeto, sino que expresa una satisfacción subjetiva.",
+    concepts: ["juicio de gusto", "estético", "subjetividad", "placer"],
+    solution:
+      "Kant distingue el juicio de conocimiento, basado en conceptos, del juicio estético, basado en el sentimiento de placer. Por eso lo bello no se demuestra científicamente, sino que se juzga desde la experiencia del sujeto.",
+  },
+  {
+    id: "kant2",
+    philosopher: "Immanuel Kant",
+    work: "Crítica de la facultad de juzgar",
+    title: "Universalidad sin concepto",
+    difficulty: "Alta",
+    quote:
+      "Lo bello es lo que place universalmente sin concepto.",
+    theme: "La paradoja de la universalidad estética.",
+    thesis:
+      "El juicio de gusto pretende validez universal, aunque no se fundamente en conceptos objetivos.",
+    concepts: ["universalidad subjetiva", "sensus communis", "gusto", "concepto"],
+    solution:
+      "Quien llama bello a algo espera la aprobación de los demás, aunque no pueda demostrarlo mediante conceptos. Kant explica esta pretensión mediante el sensus communis aestheticus.",
+  },
+  {
+    id: "platon1",
+    philosopher: "Platón",
+    work: "República, libro VII",
+    title: "Alegoría de la caverna",
+    difficulty: "Media",
+    quote:
+      "Los prisioneros toman las sombras por realidades, hasta que uno de ellos asciende hacia la luz.",
+    theme: "El paso de la ignorancia al conocimiento.",
+    thesis:
+      "La educación filosófica libera al alma de las apariencias sensibles y la orienta hacia las Ideas.",
+    concepts: ["mundo sensible", "mundo inteligible", "Idea de Bien", "educación"],
+    solution:
+      "La caverna simboliza el mundo sensible y la ignorancia. El ascenso representa la educación filosófica hacia el conocimiento verdadero de las Ideas.",
+  },
+  {
+    id: "descartes1",
+    philosopher: "René Descartes",
+    work: "Discurso del método",
+    title: "La duda metódica",
+    difficulty: "Media",
+    quote:
+      "Pienso, luego existo.",
+    theme: "La búsqueda de una verdad absolutamente segura.",
+    thesis:
+      "La existencia del sujeto pensante es la primera certeza indudable.",
+    concepts: ["duda metódica", "cogito", "racionalismo", "certeza"],
+    solution:
+      "Descartes duda de todo aquello que pueda ser falso, pero descubre que no puede dudar de que está dudando. De ahí surge el cogito como fundamento del conocimiento.",
+  },
+  {
+    id: "marx1",
+    philosopher: "Karl Marx",
+    work: "Manuscritos económico-filosóficos",
+    title: "Alienación del trabajador",
+    difficulty: "Alta",
+    quote:
+      "El trabajador se vuelve tanto más pobre cuanta más riqueza produce.",
+    theme: "La alienación en el trabajo capitalista.",
+    thesis:
+      "El capitalismo separa al trabajador del producto, de su actividad, de sí mismo y de los demás.",
+    concepts: ["alienación", "capitalismo", "trabajo", "explotación"],
+    solution:
+      "Marx afirma que en el capitalismo el trabajador produce riqueza que no le pertenece. Su trabajo deja de ser una realización humana y se convierte en una actividad impuesta.",
+  },
+  {
+    id: "nietzsche1",
+    philosopher: "Friedrich Nietzsche",
+    work: "La gaya ciencia",
+    title: "La muerte de Dios",
+    difficulty: "Alta",
+    quote:
+      "Dios ha muerto. Y nosotros lo hemos matado.",
+    theme: "La crisis de los valores tradicionales.",
+    thesis:
+      "La cultura occidental ha perdido su fundamento religioso y moral.",
+    concepts: ["muerte de Dios", "nihilismo", "valores", "superhombre"],
+    solution:
+      "Nietzsche no se refiere a una muerte literal, sino a la pérdida de autoridad de los valores absolutos. Esto abre el peligro del nihilismo y la posibilidad de crear nuevos valores.",
+  },
+];
+
+const quizQuestions = [
+  {
+    q: "¿Qué autor defiende el mundo inteligible de las Ideas?",
+    options: ["Aristóteles", "Platón", "Hume", "Marx"],
+    answer: 1,
+    explanation: "Platón distingue entre mundo sensible y mundo inteligible.",
+  },
+  {
+    q: "¿Qué autor formula el cogito?",
+    options: ["Descartes", "Kant", "Nietzsche", "Arendt"],
+    answer: 0,
+    explanation: "Descartes afirma: pienso, luego existo.",
+  },
+  {
+    q: "¿Qué autor critica la causalidad como hábito o costumbre?",
+    options: ["Tomás de Aquino", "Hume", "Rousseau", "Ortega"],
+    answer: 1,
+    explanation: "Hume entiende la causalidad como una asociación basada en la costumbre.",
+  },
+  {
+    q: "¿Qué autor habla de alienación?",
+    options: ["Marx", "Platón", "Aristóteles", "San Agustín"],
+    answer: 0,
+    explanation: "Marx analiza la alienación del trabajador en el capitalismo.",
+  },
+  {
+    q: "¿Qué concepto pertenece a Kant?",
+    options: ["plusvalía", "sensus communis", "cogito", "voluntad general"],
+    answer: 1,
+    explanation: "El sensus communis aparece en la estética kantiana.",
+  },
+];
+
+const comparisons = [
+  {
+    title: "Platón vs Aristóteles",
+    a: "Platón defiende que la realidad verdadera está en las Ideas separadas del mundo sensible.",
+    b: "Aristóteles sitúa la realidad en las sustancias concretas y rechaza la separación platónica.",
+  },
+  {
+    title: "Descartes vs Hume",
+    a: "Descartes es racionalista: busca certezas mediante la razón y el método.",
+    b: "Hume es empirista: todo conocimiento procede de la experiencia.",
+  },
+  {
+    title: "Hume vs Kant",
+    a: "Hume critica la causalidad como conexión necesaria y la reduce a costumbre.",
+    b: "Kant responde que la causalidad es una categoría a priori del entendimiento.",
+  },
+  {
+    title: "Marx vs Nietzsche",
+    a: "Marx critica la sociedad capitalista desde la economía y la lucha de clases.",
+    b: "Nietzsche critica la moral occidental y propone crear nuevos valores.",
+  },
+  {
+    title: "Ortega vs Arendt",
+    a: "Ortega analiza la vida humana desde la razón vital y la circunstancia.",
+    b: "Arendt analiza la acción política, la pluralidad y el espacio público.",
+  },
+];
 
 export default function App() {
   const [tab, setTab] = useState("comentario");
@@ -265,50 +431,23 @@ export default function App() {
   }, [examAnswer]);
 
   const achievements = [
-    {
-      name: "Primer comentario",
-      unlocked: xp >= 300,
-      icon: ScrollText,
-    },
-    {
-      name: "Aprendiz kantiano",
-      unlocked: xp >= 450,
-      icon: Brain,
-    },
-    {
-      name: "Racha filosófica",
-      unlocked: streak >= 4,
-      icon: Flame,
-    },
-    {
-      name: "Nivel PAU",
-      unlocked: level >= 4,
-      icon: Trophy,
-    },
+    { name: "Primer comentario", unlocked: xp >= 300, icon: ScrollText },
+    { name: "Aprendiz PAU", unlocked: xp >= 450, icon: Brain },
+    { name: "Racha filosófica", unlocked: streak >= 4, icon: Flame },
+    { name: "Nivel avanzado", unlocked: level >= 4, icon: Trophy },
   ];
 
-  const gainXP = (amount) => {
-    setXp((prev) => prev + amount);
-  };
+  const gainXP = (amount) => setXp((prev) => prev + amount);
 
   const resetComment = () => {
-    setAnswers({
-      theme: "",
-      thesis: "",
-      concepts: "",
-      explanation: "",
-      critique: "",
-    });
+    setAnswers({ theme: "", thesis: "", concepts: "", explanation: "", critique: "" });
     setShowSolution(false);
   };
 
   const submitQuiz = () => {
     if (selectedOption === null) return;
     setQuizDone(true);
-
-    if (selectedOption === currentQuestion.answer) {
-      gainXP(30);
-    }
+    if (selectedOption === currentQuestion.answer) gainXP(30);
   };
 
   const nextQuiz = () => {
@@ -345,6 +484,7 @@ export default function App() {
     { id: "comentario", label: "Comentario", icon: ScrollText },
     { id: "filosofos", label: "Filósofos", icon: BookOpen },
     { id: "retos", label: "Retos PAU", icon: Gamepad2 },
+    { id: "comparador", label: "Comparador", icon: Scale },
     { id: "examen", label: "Modo examen", icon: ClipboardCheck },
     { id: "progreso", label: "Progreso", icon: Trophy },
   ];
@@ -358,14 +498,11 @@ export default function App() {
               <GraduationCap className="h-5 w-5" />
               Filosofía PAU · 2.º Bachillerato
             </div>
-
             <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
               Aula Filosófica Quest
             </h1>
-
             <p className="mt-3 max-w-2xl text-base text-slate-600 md:text-lg">
-              Aprende filósofos, corrientes y comentario de texto con misiones, puntos,
-              niveles, logros y simulacros PAU.
+              Aprende autores, corrientes y comentarios de texto con retos, niveles, logros y simulacros PAU.
             </p>
           </motion.div>
 
@@ -376,38 +513,26 @@ export default function App() {
                   <p className="text-sm text-slate-500">Nivel actual</p>
                   <p className="text-3xl font-bold">Nivel {level}</p>
                 </div>
-
                 <div className="flex gap-2">
-                  <Badge>
-                    <Flame className="mr-1 inline h-3 w-3" /> {streak} días
-                  </Badge>
-                  <Badge>
-                    <Star className="mr-1 inline h-3 w-3" /> {xp} XP
-                  </Badge>
+                  <Badge><Flame className="mr-1 inline h-3 w-3" /> {streak} días</Badge>
+                  <Badge><Star className="mr-1 inline h-3 w-3" /> {xp} XP</Badge>
                 </div>
               </div>
-
               <ProgressBar value={(progress / 150) * 100} />
-
-              <p className="mt-2 text-xs text-slate-500">
-                {150 - progress} XP para el siguiente nivel
-              </p>
+              <p className="mt-2 text-xs text-slate-500">{150 - progress} XP para el siguiente nivel</p>
             </CardContent>
           </Card>
         </header>
 
-        <nav className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
+        <nav className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-6">
           {nav.map((item) => {
             const Icon = item.icon;
-
             return (
               <Button
                 key={item.id}
                 onClick={() => setTab(item.id)}
                 className={`h-14 text-sm shadow-sm ${
-                  tab === item.id
-                    ? "bg-slate-900 text-white"
-                    : "bg-white text-slate-700 hover:bg-slate-100"
+                  tab === item.id ? "bg-slate-900 text-white" : "bg-white text-slate-700 hover:bg-slate-100"
                 }`}
               >
                 <Icon className="mr-2 inline h-5 w-5" />
@@ -419,13 +544,7 @@ export default function App() {
 
         <AnimatePresence mode="wait">
           {tab === "comentario" && (
-            <motion.section
-              key="comentario"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              className="grid gap-5 lg:grid-cols-[.85fr_1.15fr]"
-            >
+            <motion.section key="comentario" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="grid gap-5 lg:grid-cols-[.85fr_1.15fr]">
               <Card>
                 <CardContent className="p-5">
                   <div className="mb-4 flex items-center justify-between">
@@ -442,15 +561,11 @@ export default function App() {
                           resetComment();
                         }}
                         className={`w-full rounded-2xl border p-4 text-left transition hover:shadow-md ${
-                          selectedText.id === t.id
-                            ? "border-slate-900 bg-slate-50"
-                            : "border-slate-200 bg-white"
+                          selectedText.id === t.id ? "border-slate-900 bg-slate-50" : "border-slate-200 bg-white"
                         }`}
                       >
                         <p className="font-semibold">{t.title}</p>
-                        <p className="text-sm text-slate-500">
-                          {t.philosopher} · {t.work}
-                        </p>
+                        <p className="text-sm text-slate-500">{t.philosopher} · {t.work}</p>
                       </button>
                     ))}
                   </div>
@@ -462,24 +577,14 @@ export default function App() {
                   <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <h2 className="text-2xl font-bold">Misión: comentario PAU</h2>
-                      <p className="text-sm text-slate-500">
-                        Completa los pasos y desbloquea la solución modelo.
-                      </p>
+                      <p className="text-sm text-slate-500">Completa los pasos y desbloquea la solución modelo.</p>
                     </div>
-
-                    <Badge>
-                      <Target className="mr-1 inline h-3 w-3" />
-                      {commentScore}% completado
-                    </Badge>
+                    <Badge><Target className="mr-1 inline h-3 w-3" /> {commentScore}% completado</Badge>
                   </div>
 
                   <div className="mb-5 rounded-2xl bg-slate-100 p-4">
-                    <p className="mb-2 text-sm font-semibold text-slate-500">
-                      {selectedText.philosopher} · {selectedText.work}
-                    </p>
-                    <p className="text-lg font-medium leading-relaxed">
-                      “{selectedText.quote}”
-                    </p>
+                    <p className="mb-2 text-sm font-semibold text-slate-500">{selectedText.philosopher} · {selectedText.work}</p>
+                    <p className="text-lg font-medium leading-relaxed">“{selectedText.quote}”</p>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
@@ -490,20 +595,11 @@ export default function App() {
                       ["explanation", "4. Explicación", "Relaciona el texto con la teoría del autor."],
                       ["critique", "5. Valoración crítica", "Compara con otro autor o problema actual."],
                     ].map(([key, label, placeholder]) => (
-                      <label
-                        key={key}
-                        className={
-                          key === "explanation" || key === "critique"
-                            ? "md:col-span-2"
-                            : ""
-                        }
-                      >
+                      <label key={key} className={key === "explanation" || key === "critique" ? "md:col-span-2" : ""}>
                         <span className="mb-1 block text-sm font-semibold">{label}</span>
                         <textarea
                           value={answers[key]}
-                          onChange={(e) =>
-                            setAnswers({ ...answers, [key]: e.target.value })
-                          }
+                          onChange={(e) => setAnswers({ ...answers, [key]: e.target.value })}
                           placeholder={placeholder}
                           className="min-h-24 w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm outline-none focus:border-slate-900"
                         />
@@ -519,46 +615,25 @@ export default function App() {
                       }}
                       className="bg-slate-900 text-white"
                     >
-                      Corregir y ver modelo
-                      <ChevronRight className="ml-2 inline h-4 w-4" />
+                      Corregir y ver modelo <ChevronRight className="ml-2 inline h-4 w-4" />
                     </Button>
 
-                    <Button
-                      onClick={resetComment}
-                      className="border border-slate-300 bg-white text-slate-800"
-                    >
+                    <Button onClick={resetComment} className="border border-slate-300 bg-white text-slate-800">
                       <RotateCcw className="mr-2 inline h-4 w-4" />
                       Reiniciar
                     </Button>
                   </div>
 
                   {showSolution && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4"
-                    >
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
                       <h3 className="mb-2 flex items-center font-bold text-emerald-900">
                         <CheckCircle2 className="mr-2 h-5 w-5" />
                         Solución modelo
                       </h3>
-
-                      <p>
-                        <strong>Tema:</strong> {selectedText.theme}
-                      </p>
-
-                      <p className="mt-2">
-                        <strong>Tesis:</strong> {selectedText.thesis}
-                      </p>
-
-                      <p className="mt-2">
-                        <strong>Conceptos:</strong>{" "}
-                        {selectedText.concepts.join(", ")}.
-                      </p>
-
-                      <p className="mt-2">
-                        <strong>Explicación:</strong> {selectedText.solution}
-                      </p>
+                      <p><strong>Tema:</strong> {selectedText.theme}</p>
+                      <p className="mt-2"><strong>Tesis:</strong> {selectedText.thesis}</p>
+                      <p className="mt-2"><strong>Conceptos:</strong> {selectedText.concepts.join(", ")}.</p>
+                      <p className="mt-2"><strong>Explicación:</strong> {selectedText.solution}</p>
                     </motion.div>
                   )}
                 </CardContent>
@@ -567,41 +642,23 @@ export default function App() {
           )}
 
           {tab === "filosofos" && (
-            <motion.section
-              key="filosofos"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              className="grid gap-5 md:grid-cols-2 xl:grid-cols-4"
-            >
+            <motion.section key="filosofos" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {philosophers.map((p) => (
-                <Card
-                  key={p.id}
-                  className={`overflow-hidden bg-gradient-to-br ${p.color}`}
-                >
+                <Card key={p.id} className={`overflow-hidden bg-gradient-to-br ${p.color}`}>
                   <CardContent className="p-5">
                     <div className="mb-3 flex items-center justify-between">
                       <Brain className="h-8 w-8" />
                       <Badge>{p.pau}</Badge>
                     </div>
-
                     <h2 className="text-2xl font-bold">{p.name}</h2>
-
-                    <p className="mt-1 text-sm font-semibold text-slate-600">
-                      {p.current}
-                    </p>
-
+                    <p className="mt-1 text-sm font-semibold text-slate-600">{p.current}</p>
                     <p className="mt-3 text-sm text-slate-700">{p.summary}</p>
-
                     <div className="mt-4">
                       <p className="mb-2 text-sm font-bold">Conceptos PAU</p>
                       <div className="flex flex-wrap gap-2">
-                        {p.concepts.map((c) => (
-                          <Badge key={c}>{c}</Badge>
-                        ))}
+                        {p.concepts.map((c) => <Badge key={c}>{c}</Badge>)}
                       </div>
                     </div>
-
                     <div className="mt-4 rounded-2xl bg-white/60 p-3 text-sm">
                       <strong>Obras:</strong> {p.works.join(" · ")}
                     </div>
@@ -612,50 +669,32 @@ export default function App() {
           )}
 
           {tab === "retos" && (
-            <motion.section
-              key="retos"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              className="grid gap-5 lg:grid-cols-[1fr_.8fr]"
-            >
+            <motion.section key="retos" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="grid gap-5 lg:grid-cols-[1fr_.8fr]">
               <Card>
                 <CardContent className="p-6">
                   <div className="mb-4 flex items-center gap-3">
                     <Gamepad2 className="h-8 w-8" />
                     <div>
                       <h2 className="text-2xl font-bold">Duelo de conceptos</h2>
-                      <p className="text-sm text-slate-500">
-                        Responde y gana XP para subir de nivel.
-                      </p>
+                      <p className="text-sm text-slate-500">Responde y gana XP para subir de nivel.</p>
                     </div>
                   </div>
 
                   <div className="rounded-2xl bg-slate-100 p-5">
                     <p className="text-lg font-bold">{currentQuestion.q}</p>
-
                     <div className="mt-4 grid gap-3">
                       {currentQuestion.options.map((option, idx) => {
                         const isCorrect = idx === currentQuestion.answer;
                         const selected = selectedOption === idx;
-
                         return (
                           <button
                             key={option}
                             disabled={quizDone}
                             onClick={() => setSelectedOption(idx)}
                             className={`rounded-2xl border p-4 text-left transition ${
-                              selected
-                                ? "border-slate-900 bg-white shadow-md"
-                                : "border-slate-200 bg-white/70"
-                            } ${
-                              quizDone && isCorrect
-                                ? "border-emerald-500 bg-emerald-50"
-                                : ""
-                            } ${
-                              quizDone && selected && !isCorrect
-                                ? "border-red-400 bg-red-50"
-                                : ""
+                              selected ? "border-slate-900 bg-white shadow-md" : "border-slate-200 bg-white/70"
+                            } ${quizDone && isCorrect ? "border-emerald-500 bg-emerald-50" : ""} ${
+                              quizDone && selected && !isCorrect ? "border-red-400 bg-red-50" : ""
                             }`}
                           >
                             {option}
@@ -666,35 +705,18 @@ export default function App() {
                   </div>
 
                   <div className="mt-5 flex gap-3">
-                    <Button onClick={submitQuiz} className="bg-slate-900 text-white">
-                      Comprobar
-                    </Button>
-
-                    <Button
-                      onClick={nextQuiz}
-                      className="border border-slate-300 bg-white text-slate-800"
-                    >
-                      Siguiente reto
-                    </Button>
+                    <Button onClick={submitQuiz} className="bg-slate-900 text-white">Comprobar</Button>
+                    <Button onClick={nextQuiz} className="border border-slate-300 bg-white text-slate-800">Siguiente reto</Button>
                   </div>
 
                   {quizDone && (
                     <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm">
                       {selectedOption === currentQuestion.answer ? (
-                        <p className="font-bold text-emerald-700">
-                          <CheckCircle2 className="mr-2 inline h-5 w-5" />
-                          Correcto: +30 XP
-                        </p>
+                        <p className="font-bold text-emerald-700"><CheckCircle2 className="mr-2 inline h-5 w-5" /> Correcto: +30 XP</p>
                       ) : (
-                        <p className="font-bold text-red-700">
-                          <XCircle className="mr-2 inline h-5 w-5" />
-                          Incorrecto
-                        </p>
+                        <p className="font-bold text-red-700"><XCircle className="mr-2 inline h-5 w-5" /> Incorrecto</p>
                       )}
-
-                      <p className="mt-2 text-sm text-slate-600">
-                        {currentQuestion.explanation}
-                      </p>
+                      <p className="mt-2 text-sm text-slate-600">{currentQuestion.explanation}</p>
                     </div>
                   )}
                 </CardContent>
@@ -706,23 +728,18 @@ export default function App() {
                     <Sparkles className="mr-2 h-6 w-6" />
                     Misiones rápidas
                   </h2>
-
                   <div className="space-y-3">
                     {[
-                      ["Comenta un texto de Kant", "+50 XP"],
-                      ["Relaciona Kant con Hume", "+40 XP"],
+                      ["Comenta un texto filosófico", "+50 XP"],
+                      ["Compara dos autores", "+40 XP"],
                       ["Define 5 conceptos PAU", "+25 XP"],
                       ["Haz una valoración crítica", "+35 XP"],
                     ].map(([mission, reward]) => (
-                      <div
-                        key={mission}
-                        className="flex items-center justify-between rounded-2xl bg-slate-100 p-4"
-                      >
+                      <div key={mission} className="flex items-center justify-between rounded-2xl bg-slate-100 p-4">
                         <div className="flex items-center gap-3">
                           <CheckCircle2 className="h-5 w-5 text-slate-500" />
                           <span className="font-medium">{mission}</span>
                         </div>
-
                         <Badge>{reward}</Badge>
                       </div>
                     ))}
@@ -732,14 +749,33 @@ export default function App() {
             </motion.section>
           )}
 
+          {tab === "comparador" && (
+            <motion.section key="comparador" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="grid gap-5 md:grid-cols-2">
+              {comparisons.map((item) => (
+                <Card key={item.title}>
+                  <CardContent className="p-6">
+                    <h2 className="mb-4 flex items-center text-2xl font-bold">
+                      <Scale className="mr-2 h-6 w-6" />
+                      {item.title}
+                    </h2>
+                    <div className="grid gap-4">
+                      <div className="rounded-2xl bg-slate-100 p-4">
+                        <p className="font-semibold">Autor A</p>
+                        <p className="mt-1 text-sm text-slate-700">{item.a}</p>
+                      </div>
+                      <div className="rounded-2xl bg-indigo-50 p-4">
+                        <p className="font-semibold">Autor B</p>
+                        <p className="mt-1 text-sm text-slate-700">{item.b}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </motion.section>
+          )}
+
           {tab === "examen" && (
-            <motion.section
-              key="examen"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              className="grid gap-5 lg:grid-cols-[1fr_.7fr]"
-            >
+            <motion.section key="examen" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="grid gap-5 lg:grid-cols-[1fr_.7fr]">
               <Card>
                 <CardContent className="p-6">
                   <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -748,62 +784,34 @@ export default function App() {
                         <ClipboardCheck className="mr-2 h-7 w-7" />
                         Simulacro PAU
                       </h2>
-                      <p className="text-sm text-slate-500">
-                        Redacta un comentario completo en tiempo limitado.
-                      </p>
+                      <p className="text-sm text-slate-500">Redacta un comentario completo en tiempo limitado.</p>
                     </div>
-
-                    <Badge>
-                      <Timer className="mr-1 inline h-3 w-3" />
-                      {minutes}:{seconds.toString().padStart(2, "0")}
-                    </Badge>
+                    <Badge><Timer className="mr-1 inline h-3 w-3" /> {minutes}:{seconds.toString().padStart(2, "0")}</Badge>
                   </div>
 
                   {!examStarted ? (
                     <div className="rounded-2xl bg-slate-100 p-5">
-                      <p className="mb-4 text-slate-700">
-                        El modo examen genera un texto aleatorio y te permite practicar
-                        como en una prueba real.
-                      </p>
-
-                      <Button onClick={startExam} className="bg-slate-900 text-white">
-                        Empezar simulacro
-                      </Button>
+                      <p className="mb-4 text-slate-700">El modo examen genera un texto aleatorio y te permite practicar como en una prueba real.</p>
+                      <Button onClick={startExam} className="bg-slate-900 text-white">Empezar simulacro</Button>
                     </div>
                   ) : (
                     <>
                       <div className="mb-5 rounded-2xl bg-slate-100 p-4">
-                        <p className="mb-2 text-sm font-semibold text-slate-500">
-                          {examText.philosopher} · {examText.work}
-                        </p>
-                        <p className="text-lg font-medium leading-relaxed">
-                          “{examText.quote}”
-                        </p>
+                        <p className="mb-2 text-sm font-semibold text-slate-500">{examText.philosopher} · {examText.work}</p>
+                        <p className="text-lg font-medium leading-relaxed">“{examText.quote}”</p>
                       </div>
 
                       <textarea
                         value={examAnswer}
                         onChange={(e) => setExamAnswer(e.target.value)}
                         disabled={examFinished}
-                        placeholder="Redacta aquí tu comentario completo: presentación, tema, tesis, explicación, contexto y valoración crítica."
+                        placeholder="Redacta aquí tu comentario completo."
                         className="min-h-80 w-full rounded-2xl border border-slate-200 bg-white p-4 text-sm outline-none focus:border-slate-900"
                       />
 
                       <div className="mt-5 flex flex-wrap gap-3">
-                        <Button
-                          onClick={finishExam}
-                          disabled={examFinished}
-                          className="bg-slate-900 text-white"
-                        >
-                          Finalizar examen
-                        </Button>
-
-                        <Button
-                          onClick={startExam}
-                          className="border border-slate-300 bg-white text-slate-800"
-                        >
-                          Nuevo simulacro
-                        </Button>
+                        <Button onClick={finishExam} disabled={examFinished} className="bg-slate-900 text-white">Finalizar examen</Button>
+                        <Button onClick={startExam} className="border border-slate-300 bg-white text-slate-800">Nuevo simulacro</Button>
                       </div>
                     </>
                   )}
@@ -814,16 +822,7 @@ export default function App() {
                         <Award className="mr-2 h-5 w-5" />
                         Resultado del simulacro
                       </h3>
-
-                      <p>
-                        Nota aproximada: <strong>{examScore}/10</strong>
-                      </p>
-
-                      <p className="mt-2 text-sm text-slate-700">
-                        La puntuación se calcula de forma orientativa por extensión.
-                        En una versión avanzada se podría corregir con rúbrica por tema,
-                        tesis, conceptos, contexto y valoración crítica.
-                      </p>
+                      <p>Nota aproximada: <strong>{examScore}/10</strong></p>
                     </div>
                   )}
                 </CardContent>
@@ -832,7 +831,6 @@ export default function App() {
               <Card>
                 <CardContent className="p-6">
                   <h2 className="mb-4 text-2xl font-bold">Rúbrica PAU</h2>
-
                   <div className="space-y-3">
                     {[
                       ["Presentación del autor y obra", "2 puntos"],
@@ -841,10 +839,7 @@ export default function App() {
                       ["Conceptos técnicos", "2 puntos"],
                       ["Valoración crítica", "1 punto"],
                     ].map(([item, points]) => (
-                      <div
-                        key={item}
-                        className="flex items-center justify-between rounded-2xl bg-slate-100 p-4"
-                      >
+                      <div key={item} className="flex items-center justify-between rounded-2xl bg-slate-100 p-4">
                         <span className="font-medium">{item}</span>
                         <Badge>{points}</Badge>
                       </div>
@@ -856,13 +851,7 @@ export default function App() {
           )}
 
           {tab === "progreso" && (
-            <motion.section
-              key="progreso"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              className="grid gap-5 md:grid-cols-3"
-            >
+            <motion.section key="progreso" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="grid gap-5 md:grid-cols-3">
               <Card className="md:col-span-2">
                 <CardContent className="p-6">
                   <h2 className="mb-4 text-2xl font-bold">Panel del alumno</h2>
@@ -872,12 +861,10 @@ export default function App() {
                       <p className="text-sm text-slate-500">XP total</p>
                       <p className="text-4xl font-bold">{xp}</p>
                     </div>
-
                     <div className="rounded-3xl bg-slate-100 p-5">
                       <p className="text-sm text-slate-500">Nivel</p>
                       <p className="text-4xl font-bold">{level}</p>
                     </div>
-
                     <div className="rounded-3xl bg-slate-100 p-5">
                       <p className="text-sm text-slate-500">Racha</p>
                       <p className="text-4xl font-bold">{streak}</p>
@@ -886,11 +873,11 @@ export default function App() {
 
                   <div className="mt-5">
                     <p className="mb-2 font-semibold">Competencias PAU</p>
-
                     {[
                       ["Identificar tema y tesis", 78],
                       ["Usar vocabulario filosófico", 64],
                       ["Contextualizar al autor", 72],
+                      ["Comparar autores", 58],
                       ["Valorar críticamente", 46],
                     ].map(([label, value]) => (
                       <div key={label} className="mb-4">
@@ -898,15 +885,12 @@ export default function App() {
                           <span>{label}</span>
                           <span>{value}%</span>
                         </div>
-
                         <ProgressBar value={value} />
                       </div>
                     ))}
                   </div>
 
-                  <Button onClick={resetProgress} className="mt-4 bg-red-500 text-white">
-                    Reiniciar progreso
-                  </Button>
+                  <Button onClick={resetProgress} className="mt-4 bg-red-500 text-white">Reiniciar progreso</Button>
                 </CardContent>
               </Card>
 
@@ -917,7 +901,6 @@ export default function App() {
                       <Users className="mr-2 h-6 w-6" />
                       Ranking aula
                     </h2>
-
                     <div className="space-y-3">
                       {[
                         ["Lucía", 620],
@@ -927,16 +910,8 @@ export default function App() {
                       ]
                         .sort((a, b) => b[1] - a[1])
                         .map(([name, points], idx) => (
-                          <div
-                            key={name}
-                            className={`flex items-center justify-between rounded-2xl p-3 ${
-                              name === "Tú" ? "bg-indigo-100" : "bg-slate-100"
-                            }`}
-                          >
-                            <span className="font-semibold">
-                              #{idx + 1} {name}
-                            </span>
-
+                          <div key={name} className={`flex items-center justify-between rounded-2xl p-3 ${name === "Tú" ? "bg-indigo-100" : "bg-slate-100"}`}>
+                            <span className="font-semibold">#{idx + 1} {name}</span>
                             <Badge>{points} XP</Badge>
                           </div>
                         ))}
@@ -950,30 +925,18 @@ export default function App() {
                       <Award className="mr-2 h-6 w-6" />
                       Logros
                     </h2>
-
                     <div className="space-y-3">
                       {achievements.map((achievement) => {
                         const Icon = achievement.icon;
-
                         return (
-                          <div
-                            key={achievement.name}
-                            className={`flex items-center justify-between rounded-2xl p-3 ${
-                              achievement.unlocked
-                                ? "bg-emerald-100 text-emerald-900"
-                                : "bg-slate-100 text-slate-400"
-                            }`}
-                          >
+                          <div key={achievement.name} className={`flex items-center justify-between rounded-2xl p-3 ${
+                            achievement.unlocked ? "bg-emerald-100 text-emerald-900" : "bg-slate-100 text-slate-400"
+                          }`}>
                             <div className="flex items-center gap-3">
                               <Icon className="h-5 w-5" />
                               <span className="font-semibold">{achievement.name}</span>
                             </div>
-
-                            {achievement.unlocked ? (
-                              <CheckCircle2 className="h-5 w-5" />
-                            ) : (
-                              <XCircle className="h-5 w-5" />
-                            )}
+                            {achievement.unlocked ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
                           </div>
                         );
                       })}
