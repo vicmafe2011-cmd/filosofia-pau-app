@@ -1,33 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  BookOpen,
-  Trophy,
-  Flame,
-  Brain,
-  CheckCircle2,
-  XCircle,
-  Star,
-  ScrollText,
-  Gamepad2,
-  Users,
-  Sparkles,
-  GraduationCap,
-  ChevronRight,
-  RotateCcw,
-  Target,
-  Timer,
-  Award,
-  ClipboardCheck,
-  Scale,
+  BookOpen, Trophy, Flame, Brain, CheckCircle2, XCircle, Star, ScrollText,
+  Gamepad2, Users, Sparkles, GraduationCap, ChevronRight, RotateCcw, Target,
+  Timer, Award, ClipboardCheck, Scale, History, Wand2
 } from "lucide-react";
 
 function Card({ children, className = "" }) {
-  return (
-    <div className={`rounded-3xl bg-white shadow-xl ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`rounded-3xl bg-white shadow-xl ${className}`}>{children}</div>;
 }
 
 function CardContent({ children, className = "" }) {
@@ -596,6 +576,120 @@ const comparisons = [
   },
 ];
 
+function countWords(text) {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function normalize(text) {
+  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function evaluateComment({ answers, selectedText }) {
+  const fullText = Object.values(answers).join(" ");
+  const clean = normalize(fullText);
+  const words = countWords(fullText);
+
+  const conceptHits = selectedText.concepts.filter((c) =>
+    clean.includes(normalize(c))
+  ).length;
+
+  const sections = [
+    {
+      name: "Tema",
+      max: 2,
+      score: answers.theme.trim().length > 35 ? 2 : answers.theme.trim().length > 15 ? 1 : 0,
+      feedback:
+        answers.theme.trim().length > 35
+          ? "Tema bien identificado."
+          : "Debes formular el problema filosófico con más precisión.",
+    },
+    {
+      name: "Tesis",
+      max: 2,
+      score: answers.thesis.trim().length > 35 ? 2 : answers.thesis.trim().length > 15 ? 1 : 0,
+      feedback:
+        answers.thesis.trim().length > 35
+          ? "Tesis clara y suficientemente desarrollada."
+          : "La tesis debe expresar qué defiende exactamente el autor.",
+    },
+    {
+      name: "Conceptos",
+      max: 2,
+      score: conceptHits >= 3 ? 2 : conceptHits >= 1 ? 1 : 0,
+      feedback:
+        conceptHits >= 3
+          ? "Buen uso del vocabulario técnico."
+          : "Incluye más conceptos propios del autor y explícalos.",
+    },
+    {
+      name: "Explicación",
+      max: 3,
+      score:
+        answers.explanation.trim().length > 220
+          ? 3
+          : answers.explanation.trim().length > 120
+          ? 2
+          : answers.explanation.trim().length > 40
+          ? 1
+          : 0,
+      feedback:
+        answers.explanation.trim().length > 220
+          ? "Explicación amplia y conectada con la teoría."
+          : "Necesitas desarrollar mejor la relación entre el texto y la teoría del autor.",
+    },
+    {
+      name: "Valoración crítica",
+      max: 1,
+      score: answers.critique.trim().length > 80 ? 1 : 0,
+      feedback:
+        answers.critique.trim().length > 80
+          ? "Incluyes valoración crítica."
+          : "Añade comparación con otro autor o una reflexión crítica actual.",
+    },
+  ];
+
+  const total = sections.reduce((acc, s) => acc + s.score, 0);
+
+  let globalFeedback = "Buen intento. Sigue practicando.";
+  if (total >= 9) globalFeedback = "Excelente comentario: estructura, conceptos y explicación muy sólidos.";
+  else if (total >= 7) globalFeedback = "Buen comentario: faltan pequeños ajustes para llegar al sobresaliente.";
+  else if (total >= 5) globalFeedback = "Comentario aprobado: mejora conceptos y desarrollo explicativo.";
+  else globalFeedback = "Comentario insuficiente: revisa tema, tesis y explicación antes de valorar críticamente.";
+
+  return {
+    total,
+    sections,
+    words,
+    conceptHits,
+    globalFeedback,
+  };
+}
+
+function evaluateExamEssay(text, selectedText) {
+  const clean = normalize(text);
+  const words = countWords(text);
+  const conceptHits = selectedText.concepts.filter((c) =>
+    clean.includes(normalize(c))
+  ).length;
+
+  let score = 0;
+  if (words > 80) score += 2;
+  if (words > 180) score += 2;
+  if (words > 280) score += 1;
+  if (clean.includes(normalize(selectedText.philosopher))) score += 1;
+  if (conceptHits >= 2) score += 2;
+  if (conceptHits >= 4) score += 1;
+  if (
+    clean.includes("critica") ||
+    clean.includes("compar") ||
+    clean.includes("actual")
+  ) {
+    score += 1;
+  }
+
+  return Math.min(score, 10);
+}
+
 export default function App() {
   const [tab, setTab] = useState("comentario");
   const [selectedText, setSelectedText] = useState(texts[0]);
@@ -609,6 +703,7 @@ export default function App() {
   });
 
   const [showSolution, setShowSolution] = useState(false);
+  const [rubricResult, setRubricResult] = useState(null);
 
   const [xp, setXp] = useState(() => {
     const saved = localStorage.getItem("xp");
@@ -620,6 +715,11 @@ export default function App() {
     return saved ? Number(saved) : 4;
   });
 
+  const [history, setHistory] = useState(() => {
+    const saved = localStorage.getItem("history");
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [quizIndex, setQuizIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [quizDone, setQuizDone] = useState(false);
@@ -629,6 +729,7 @@ export default function App() {
   const [examTime, setExamTime] = useState(900);
   const [examText, setExamText] = useState(texts[1]);
   const [examAnswer, setExamAnswer] = useState("");
+  const [examScore, setExamScore] = useState(null);
 
   const level = Math.floor(xp / 150) + 1;
   const progress = xp % 150;
@@ -643,13 +744,17 @@ export default function App() {
   }, [streak]);
 
   useEffect(() => {
+    localStorage.setItem("history", JSON.stringify(history));
+  }, [history]);
+
+  useEffect(() => {
     if (!examStarted || examFinished) return;
 
     const timer = setInterval(() => {
       setExamTime((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          setExamFinished(true);
+          finishExam();
           return 0;
         }
         return prev - 1;
@@ -657,7 +762,7 @@ export default function App() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [examStarted, examFinished]);
+  }, [examStarted, examFinished, examAnswer]);
 
   const commentScore = useMemo(() => {
     const fields = Object.values(answers);
@@ -665,21 +770,12 @@ export default function App() {
     return Math.round((filled / fields.length) * 100);
   }, [answers]);
 
-  const examScore = useMemo(() => {
-    const words = examAnswer.trim().split(/\s+/).filter(Boolean).length;
-    if (words > 300) return 10;
-    if (words > 220) return 8;
-    if (words > 150) return 6;
-    if (words > 80) return 4;
-    if (words > 30) return 2;
-    return 0;
-  }, [examAnswer]);
-
   const achievements = [
-    { name: "Primer comentario", unlocked: xp >= 300, icon: ScrollText },
+    { name: "Primer comentario", unlocked: history.length >= 1, icon: ScrollText },
     { name: "Aprendiz PAU", unlocked: xp >= 450, icon: Brain },
     { name: "Racha filosófica", unlocked: streak >= 4, icon: Flame },
     { name: "Nivel avanzado", unlocked: level >= 4, icon: Trophy },
+    { name: "Comentario sobresaliente", unlocked: history.some((h) => h.score >= 9), icon: Award },
   ];
 
   const gainXP = (amount) => setXp((prev) => prev + amount);
@@ -693,6 +789,24 @@ export default function App() {
       critique: "",
     });
     setShowSolution(false);
+    setRubricResult(null);
+  };
+
+  const correctComment = () => {
+    const result = evaluateComment({ answers, selectedText });
+    setRubricResult(result);
+    setShowSolution(true);
+    gainXP(result.total * 10);
+
+    const newAttempt = {
+      id: Date.now(),
+      title: selectedText.title,
+      author: selectedText.philosopher,
+      score: result.total,
+      date: new Date().toLocaleDateString(),
+    };
+
+    setHistory((prev) => [newAttempt, ...prev].slice(0, 10));
   };
 
   const submitQuiz = () => {
@@ -714,18 +828,33 @@ export default function App() {
     setExamTime(900);
     setExamStarted(true);
     setExamFinished(false);
+    setExamScore(null);
   };
 
-  const finishExam = () => {
+  function finishExam() {
+    const score = evaluateExamEssay(examAnswer, examText);
     setExamFinished(true);
-    gainXP(examScore * 10);
-  };
+    setExamScore(score);
+    gainXP(score * 10);
+
+    const newAttempt = {
+      id: Date.now(),
+      title: `Simulacro: ${examText.title}`,
+      author: examText.philosopher,
+      score,
+      date: new Date().toLocaleDateString(),
+    };
+
+    setHistory((prev) => [newAttempt, ...prev].slice(0, 10));
+  }
 
   const resetProgress = () => {
     setXp(260);
     setStreak(4);
+    setHistory([]);
     localStorage.removeItem("xp");
     localStorage.removeItem("streak");
+    localStorage.removeItem("history");
   };
 
   const minutes = Math.floor(examTime / 60);
@@ -747,7 +876,7 @@ export default function App() {
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-indigo-700">
               <GraduationCap className="h-5 w-5" />
-              Filosofía PAU · 2.º Bachillerato
+              Filosofía PAU · Versión PRO
             </div>
 
             <h1 className="text-3xl font-bold tracking-tight md:text-5xl">
@@ -755,8 +884,8 @@ export default function App() {
             </h1>
 
             <p className="mt-3 max-w-2xl text-base text-slate-600 md:text-lg">
-              Aprende autores, corrientes y comentarios de texto con retos, niveles,
-              logros y simulacros PAU.
+              Entrena comentarios de texto con rúbrica automática, autores PAU,
+              retos, logros, historial y simulacros.
             </p>
           </motion.div>
 
@@ -852,9 +981,11 @@ export default function App() {
                 <CardContent className="p-5">
                   <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <h2 className="text-2xl font-bold">Misión: comentario PAU</h2>
+                      <h2 className="text-2xl font-bold">
+                        Corrector PRO de comentario
+                      </h2>
                       <p className="text-sm text-slate-500">
-                        Completa los pasos y desbloquea la solución modelo.
+                        Redacta por apartados y recibe nota con rúbrica.
                       </p>
                     </div>
 
@@ -906,14 +1037,11 @@ export default function App() {
 
                   <div className="mt-5 flex flex-wrap gap-3">
                     <Button
-                      onClick={() => {
-                        setShowSolution(true);
-                        gainXP(50);
-                      }}
+                      onClick={correctComment}
                       className="bg-slate-900 text-white"
                     >
-                      Corregir y ver modelo
-                      <ChevronRight className="ml-2 inline h-4 w-4" />
+                      <Wand2 className="mr-2 inline h-4 w-4" />
+                      Corregir con rúbrica
                     </Button>
 
                     <Button
@@ -924,6 +1052,40 @@ export default function App() {
                       Reiniciar
                     </Button>
                   </div>
+
+                  {rubricResult && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="mt-5 rounded-2xl border border-indigo-200 bg-indigo-50 p-4"
+                    >
+                      <h3 className="mb-2 flex items-center font-bold text-indigo-900">
+                        <Award className="mr-2 h-5 w-5" />
+                        Nota PRO: {rubricResult.total}/10
+                      </h3>
+
+                      <p className="mb-3 text-sm text-slate-700">
+                        {rubricResult.globalFeedback}
+                      </p>
+
+                      <div className="space-y-2">
+                        {rubricResult.sections.map((s) => (
+                          <div
+                            key={s.name}
+                            className="rounded-2xl bg-white/70 p-3 text-sm"
+                          >
+                            <div className="flex justify-between font-semibold">
+                              <span>{s.name}</span>
+                              <span>
+                                {s.score}/{s.max}
+                              </span>
+                            </div>
+                            <p className="mt-1 text-slate-600">{s.feedback}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
 
                   {showSolution && (
                     <motion.div
@@ -1183,8 +1345,8 @@ export default function App() {
                   {!examStarted ? (
                     <div className="rounded-2xl bg-slate-100 p-5">
                       <p className="mb-4 text-slate-700">
-                        El modo examen genera un texto aleatorio y te permite
-                        practicar como en una prueba real.
+                        El modo examen genera un texto aleatorio y lo corrige con
+                        un sistema automático orientativo.
                       </p>
 
                       <Button onClick={startExam} className="bg-slate-900 text-white">
@@ -1329,32 +1491,31 @@ export default function App() {
                 <Card>
                   <CardContent className="p-6">
                     <h2 className="mb-4 flex items-center text-2xl font-bold">
-                      <Users className="mr-2 h-6 w-6" />
-                      Ranking aula
+                      <History className="mr-2 h-6 w-6" />
+                      Historial
                     </h2>
 
                     <div className="space-y-3">
-                      {[
-                        ["Lucía", 620],
-                        ["Marcos", 575],
-                        ["Tú", xp],
-                        ["Aitana", 240],
-                      ]
-                        .sort((a, b) => b[1] - a[1])
-                        .map(([name, points], idx) => (
-                          <div
-                            key={name}
-                            className={`flex items-center justify-between rounded-2xl p-3 ${
-                              name === "Tú" ? "bg-indigo-100" : "bg-slate-100"
-                            }`}
-                          >
-                            <span className="font-semibold">
-                              #{idx + 1} {name}
-                            </span>
+                      {history.length === 0 && (
+                        <p className="text-sm text-slate-500">
+                          Todavía no hay intentos guardados.
+                        </p>
+                      )}
 
-                            <Badge>{points} XP</Badge>
+                      {history.map((item) => (
+                        <div
+                          key={item.id}
+                          className="rounded-2xl bg-slate-100 p-3 text-sm"
+                        >
+                          <div className="flex justify-between font-semibold">
+                            <span>{item.title}</span>
+                            <span>{item.score}/10</span>
                           </div>
-                        ))}
+                          <p className="text-slate-500">
+                            {item.author} · {item.date}
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -1381,7 +1542,9 @@ export default function App() {
                           >
                             <div className="flex items-center gap-3">
                               <Icon className="h-5 w-5" />
-                              <span className="font-semibold">{achievement.name}</span>
+                              <span className="font-semibold">
+                                {achievement.name}
+                              </span>
                             </div>
 
                             {achievement.unlocked ? (
