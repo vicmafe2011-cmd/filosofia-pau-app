@@ -229,7 +229,7 @@ const texts = Array.from({ length: 100 }, (_, i) => {
   return { ...base, id: `${base.id}-pau-${i + 1}`, title: `${base.title} · Texto PAU ${i + 1}`, difficulty: bloque % 3 === 0 ? "Alta" : bloque % 2 === 0 ? "Media" : base.difficulty, solution: `${base.solution} Este texto permite preparar una respuesta PAU relacionándolo con el pensamiento de ${base.philosopher}.` };
 });
 
-const quizQuestions = [
+const quizSeed = [
   { q: "¿Qué autor defiende el mundo inteligible de las Ideas?", options: ["Aristóteles", "Platón", "Hume", "Marx"], answer: 1, explanation: "Platón distingue entre mundo sensible y mundo inteligible." },
   { q: "¿Qué autor formula el cogito?", options: ["Descartes", "Kant", "Nietzsche", "Arendt"], answer: 0, explanation: "Descartes afirma: pienso, luego existo." },
   { q: "¿Qué autor critica la causalidad como hábito?", options: ["Tomás de Aquino", "Hume", "Rousseau", "Ortega"], answer: 1, explanation: "Hume entiende la causalidad como costumbre." },
@@ -241,6 +241,44 @@ const quizQuestions = [
   { q: "¿Qué autora habla de banalidad del mal?", options: ["Arendt", "Ortega", "Platón", "Tomás de Aquino"], answer: 0, explanation: "Arendt analiza la banalidad del mal en Eichmann en Jerusalén." },
   { q: "¿Qué autor une razón y fe?", options: ["Tomás de Aquino", "Hume", "Marx", "Nietzsche"], answer: 0, explanation: "Tomás defiende compatibilidad entre razón y fe." },
 ];
+
+function shuffleArray(array) {
+  return [...array].sort(() => Math.random() - 0.5);
+}
+
+function makeQuestion(question, correct, wrongOptions, explanation) {
+  const cleanWrong = [...new Set(wrongOptions)].filter((x) => x && x !== correct);
+  const options = shuffleArray([...cleanWrong.slice(0, 3), correct]);
+  return { q: question, options, answer: options.indexOf(correct), explanation };
+}
+
+function buildQuizQuestions() {
+  const allConcepts = [...new Set(philosophers.flatMap((p) => p.concepts))];
+  const allWorks = [...new Set(philosophers.flatMap((p) => p.works))];
+  const allCurrents = [...new Set(philosophers.map((p) => p.current))];
+  const allAuthors = philosophers.map((p) => p.name);
+  const questions = [...quizSeed];
+
+  philosophers.forEach((p) => {
+    p.concepts.forEach((concept) => {
+      questions.push(makeQuestion(`¿Qué concepto pertenece a ${p.name}?`, concept, allConcepts.filter((c) => !p.concepts.includes(c)), `"${concept}" es un concepto clave de ${p.name}.`));
+      questions.push(makeQuestion(`¿A qué autor pertenece el concepto "${concept}"?`, p.name, allAuthors.filter((name) => name !== p.name), `"${concept}" pertenece al pensamiento de ${p.name}.`));
+    });
+    p.works.forEach((work) => {
+      questions.push(makeQuestion(`¿Qué obra pertenece a ${p.name}?`, work, allWorks.filter((w) => !p.works.includes(w)), `"${work}" es una obra asociada a ${p.name}.`));
+      questions.push(makeQuestion(`¿Quién escribió o está asociado a "${work}"?`, p.name, allAuthors.filter((name) => name !== p.name), `"${work}" corresponde a ${p.name}.`));
+    });
+    questions.push(makeQuestion(`¿Cuál es la corriente filosófica de ${p.name}?`, p.current, allCurrents.filter((current) => current !== p.current), `${p.name} se asocia con ${p.current}.`));
+    questions.push(makeQuestion(`¿Qué autor encaja mejor con esta idea: "${p.summary}"?`, p.name, allAuthors.filter((name) => name !== p.name), `La descripción resume el pensamiento de ${p.name}.`));
+  });
+  baseTexts.forEach((t) => {
+    questions.push(makeQuestion(`¿A qué autor pertenece este texto: "${t.title}"?`, t.philosopher, allAuthors.filter((name) => name !== t.philosopher), `"${t.title}" pertenece al bloque de ${t.philosopher}.`));
+    t.concepts.forEach((concept) => {
+      questions.push(makeQuestion(`En el texto "${t.title}", ¿qué concepto es clave?`, concept, allConcepts.filter((c) => !t.concepts.includes(c)), `"${concept}" es clave para comentar "${t.title}".`));
+    });
+  });
+  return shuffleArray(questions);
+}
 
 const comparisons = [
   { title: "Platón vs Aristóteles", a: "Platón sitúa la verdad en las Ideas separadas.", b: "Aristóteles sitúa la realidad en sustancias concretas." },
@@ -338,9 +376,15 @@ export default function App() {
   const [streak, setStreak] = useState(() => Number(localStorage.getItem("streak")) || 4);
   const [history, setHistory] = useState(() => JSON.parse(localStorage.getItem("history") || "[]"));
   const [completedLessons, setCompletedLessons] = useState(() => JSON.parse(localStorage.getItem("completedLessons") || "[]"));
+  const quizQuestions = useMemo(() => buildQuizQuestions(), []);
   const [quizIndex, setQuizIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [quizDone, setQuizDone] = useState(false);
+  const [quizStreak, setQuizStreak] = useState(0);
+  const [quizCorrect, setQuizCorrect] = useState(0);
+  const [quizWrong, setQuizWrong] = useState(0);
+  const [wrongQuestions, setWrongQuestions] = useState([]);
+  const [reviewMode, setReviewMode] = useState(false);
   const [examStarted, setExamStarted] = useState(false);
   const [examFinished, setExamFinished] = useState(false);
   const [examTime, setExamTime] = useState(900);
@@ -352,7 +396,8 @@ export default function App() {
 
   const level = Math.floor(xp / 150) + 1;
   const progress = xp % 150;
-  const currentQuestion = quizQuestions[quizIndex];
+  const activeQuizQuestions = reviewMode && wrongQuestions.length > 0 ? wrongQuestions : quizQuestions;
+  const currentQuestion = activeQuizQuestions[quizIndex % activeQuizQuestions.length];
   const lessonProgress = Math.round((completedLessons.length / lessons.length) * 100);
   const theory = theoryByAuthor[theoryText.philosopher] || { title: `Teoría de ${theoryText.philosopher}`, visual: "platon", blocks: [{ heading: "Teoría básica", points: [theoryText.thesis, theoryText.solution, `Conceptos clave: ${theoryText.concepts.join(", ")}.`] }] };
 
@@ -411,8 +456,25 @@ export default function App() {
     gainXP(result.total * 10);
     setHistory((prev) => [{ id: Date.now(), title: selectedText.title, author: selectedText.philosopher, score: result.total, date: new Date().toLocaleDateString() }, ...prev].slice(0, 10));
   };
-  const submitQuiz = () => { if (selectedOption === null) return; setQuizDone(true); if (selectedOption === currentQuestion.answer) gainXP(30); };
-  const nextQuiz = () => { setSelectedOption(null); setQuizDone(false); setQuizIndex((prev) => (prev + 1) % quizQuestions.length); };
+  const submitQuiz = () => {
+    if (selectedOption === null) return;
+    const isCorrect = selectedOption === currentQuestion.answer;
+    setQuizDone(true);
+    if (isCorrect) {
+      const bonus = quizStreak >= 4 ? 20 : quizStreak >= 2 ? 10 : 0;
+      gainXP(30 + bonus);
+      setQuizCorrect((prev) => prev + 1);
+      setQuizStreak((prev) => prev + 1);
+      if (reviewMode) setWrongQuestions((prev) => prev.filter((q) => q.q !== currentQuestion.q));
+    } else {
+      setQuizWrong((prev) => prev + 1);
+      setQuizStreak(0);
+      setWrongQuestions((prev) => prev.some((q) => q.q === currentQuestion.q) ? prev : [currentQuestion, ...prev].slice(0, 30));
+    }
+  };
+  const nextQuiz = () => { setSelectedOption(null); setQuizDone(false); const total = activeQuizQuestions.length || 1; setQuizIndex((prev) => (prev + 1) % total); };
+  const startReviewMode = () => { if (wrongQuestions.length === 0) return; setReviewMode(true); setQuizIndex(0); setSelectedOption(null); setQuizDone(false); };
+  const stopReviewMode = () => { setReviewMode(false); setQuizIndex(0); setSelectedOption(null); setQuizDone(false); };
   const startExam = () => { const randomText = texts[Math.floor(Math.random() * texts.length)]; setExamText(randomText); setExamAnswer(""); setExamTime(900); setExamStarted(true); setExamFinished(false); setExamScore(null); };
   function finishExam() {
     const score = evaluateExamEssay(examAnswer, examText);
@@ -472,7 +534,20 @@ export default function App() {
 
           {tab === "filosofos" && <motion.section key="filosofos" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{philosophers.map((p) => <Card key={p.id} className={`overflow-hidden bg-gradient-to-br ${p.color}`}><CardContent className="p-5"><div className="mb-3 flex items-center justify-between"><Brain className="h-8 w-8" /><Badge>{p.pau}</Badge></div><h2 className="text-2xl font-bold">{p.name}</h2><p className="mt-1 text-sm font-semibold text-slate-600">{p.current}</p><p className="mt-3 text-sm text-slate-700">{p.summary}</p><div className="mt-4"><p className="mb-2 text-sm font-bold">Conceptos PAU</p><div className="flex flex-wrap gap-2">{p.concepts.map((c) => <Badge key={c}>{c}</Badge>)}</div></div><div className="mt-4 rounded-2xl bg-white/60 p-3 text-sm"><strong>Obras:</strong> {p.works.join(" · ")}</div><Button onClick={() => { const sample = texts.find((t) => t.philosopher === p.name) || texts[0]; setTheoryText(sample); setTab("teoria"); }} className="mt-4 bg-slate-900 text-white">Ver teoría visual</Button></CardContent></Card>)}</motion.section>}
 
-          {tab === "retos" && <motion.section key="retos" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="grid gap-5 lg:grid-cols-[1fr_.8fr]"><Card><CardContent className="p-6"><div className="mb-4 flex items-center gap-3"><Gamepad2 className="h-8 w-8" /><div><h2 className="text-2xl font-bold">Duelo de conceptos</h2><p className="text-sm text-slate-500">Responde y gana XP para subir de nivel.</p></div></div><div className="rounded-2xl bg-slate-100 p-5"><p className="text-lg font-bold">{currentQuestion.q}</p><div className="mt-4 grid gap-3">{currentQuestion.options.map((option, idx) => { const isCorrect = idx === currentQuestion.answer; const selected = selectedOption === idx; return <button key={option} type="button" disabled={quizDone} onClick={() => setSelectedOption(idx)} className={`rounded-2xl border p-4 text-left transition ${selected ? "border-slate-900 bg-white shadow-md" : "border-slate-200 bg-white/70"} ${quizDone && isCorrect ? "border-emerald-500 bg-emerald-50" : ""} ${quizDone && selected && !isCorrect ? "border-red-400 bg-red-50" : ""}`}>{option}</button>; })}</div></div><div className="mt-5 flex gap-3"><Button onClick={submitQuiz} className="bg-slate-900 text-white">Comprobar</Button><Button onClick={nextQuiz} className="border border-slate-300 bg-white text-slate-800">Siguiente reto</Button></div>{quizDone && <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm">{selectedOption === currentQuestion.answer ? <p className="font-bold text-emerald-700"><CheckCircle2 className="mr-2 inline h-5 w-5" />Correcto: +30 XP</p> : <p className="font-bold text-red-700"><XCircle className="mr-2 inline h-5 w-5" />Incorrecto</p>}<p className="mt-2 text-sm text-slate-600">{currentQuestion.explanation}</p></div>}</CardContent></Card><Card><CardContent className="p-6"><h2 className="mb-4 flex items-center text-2xl font-bold"><Sparkles className="mr-2 h-6 w-6" />Misiones rápidas</h2><div className="space-y-3">{[["Comenta un texto filosófico", "+50 XP"], ["Compara dos autores", "+40 XP"], ["Define 5 conceptos PAU", "+25 XP"], ["Haz una valoración crítica", "+35 XP"], ["Completa 5 flashcards", "+20 XP"]].map(([mission, reward]) => <div key={mission} className="flex items-center justify-between rounded-2xl bg-slate-100 p-4"><div className="flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-slate-500" /><span className="font-medium">{mission}</span></div><Badge>{reward}</Badge></div>)}</div></CardContent></Card></motion.section>}
+          {tab === "retos" && (
+            <motion.section key="retos" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="grid gap-5 lg:grid-cols-[1fr_.8fr]">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><Gamepad2 className="h-8 w-8" /><div><h2 className="text-2xl font-bold">Duelo de conceptos PRO</h2><p className="text-sm text-slate-500">Preguntas automáticas de autores, conceptos, obras, corrientes y textos.</p></div></div><Badge>{reviewMode ? "Repaso de errores" : `${quizQuestions.length} preguntas`}</Badge></div>
+                  <div className="mb-4 grid gap-3 md:grid-cols-4"><div className="rounded-2xl bg-slate-100 p-4"><p className="text-xs text-slate-500">Aciertos</p><p className="text-2xl font-bold text-emerald-700">{quizCorrect}</p></div><div className="rounded-2xl bg-slate-100 p-4"><p className="text-xs text-slate-500">Fallos</p><p className="text-2xl font-bold text-red-600">{quizWrong}</p></div><div className="rounded-2xl bg-slate-100 p-4"><p className="text-xs text-slate-500">Racha</p><p className="text-2xl font-bold">{quizStreak}</p></div><div className="rounded-2xl bg-slate-100 p-4"><p className="text-xs text-slate-500">Errores a repasar</p><p className="text-2xl font-bold">{wrongQuestions.length}</p></div></div>
+                  <div className="rounded-2xl bg-slate-100 p-5"><div className="mb-3 flex items-center justify-between gap-3"><p className="text-sm font-semibold text-slate-500">Pregunta {(quizIndex % activeQuizQuestions.length) + 1} / {activeQuizQuestions.length}</p>{quizStreak >= 3 && <Badge><Flame className="mr-1 inline h-3 w-3" />Bonus de racha activo</Badge>}</div><p className="text-lg font-bold">{currentQuestion.q}</p><div className="mt-4 grid gap-3">{currentQuestion.options.map((option, idx) => { const isCorrect = idx === currentQuestion.answer; const selected = selectedOption === idx; return <button key={`${currentQuestion.q}-${option}`} type="button" disabled={quizDone} onClick={() => setSelectedOption(idx)} className={`rounded-2xl border p-4 text-left transition ${selected ? "border-slate-900 bg-white shadow-md" : "border-slate-200 bg-white/70"} ${quizDone && isCorrect ? "border-emerald-500 bg-emerald-50" : ""} ${quizDone && selected && !isCorrect ? "border-red-400 bg-red-50" : ""}`}>{option}</button>; })}</div></div>
+                  <div className="mt-5 flex flex-wrap gap-3"><Button onClick={submitQuiz} disabled={quizDone} className="bg-slate-900 text-white">Comprobar</Button><Button onClick={nextQuiz} className="border border-slate-300 bg-white text-slate-800">Siguiente reto</Button>{!reviewMode ? <Button onClick={startReviewMode} disabled={wrongQuestions.length === 0} className="border border-red-300 bg-red-50 text-red-700">Repasar errores</Button> : <Button onClick={stopReviewMode} className="border border-slate-300 bg-white text-slate-800">Salir del repaso</Button>}</div>
+                  {quizDone && <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm">{selectedOption === currentQuestion.answer ? <p className="font-bold text-emerald-700"><CheckCircle2 className="mr-2 inline h-5 w-5" />Correcto: +30 XP{quizStreak >= 3 ? " + bonus de racha" : ""}</p> : <p className="font-bold text-red-700"><XCircle className="mr-2 inline h-5 w-5" />Incorrecto</p>}<p className="mt-2 text-sm text-slate-600">{currentQuestion.explanation}</p></div>}
+                </CardContent>
+              </Card>
+              <Card><CardContent className="p-6"><h2 className="mb-4 flex items-center text-2xl font-bold"><Sparkles className="mr-2 h-6 w-6" />Modo élite PAU</h2><div className="space-y-3">{[["Conceptos de todos los autores", "automático"], ["Obras y autores", "automático"], ["Corrientes filosóficas", "automático"], ["Textos y conceptos clave", "automático"], ["Repaso inteligente de errores", `${wrongQuestions.length} pendientes`], ["Bonus por racha", quizStreak >= 3 ? "activo" : "desde 3 aciertos"]].map(([mission, reward]) => <div key={mission} className="flex items-center justify-between rounded-2xl bg-slate-100 p-4"><div className="flex items-center gap-3"><CheckCircle2 className="h-5 w-5 text-slate-500" /><span className="font-medium">{mission}</span></div><Badge>{reward}</Badge></div>)}</div><div className="mt-5 rounded-2xl bg-indigo-50 p-4 text-sm text-slate-700"><p className="font-bold text-indigo-900">Consejo de uso</p><p className="mt-1">Haz rondas rápidas. Cuando falles, entra en “Repasar errores”. Así la app insiste en lo que más te cuesta.</p></div></CardContent></Card>
+            </motion.section>
+          )}
 
           {tab === "comparador" && <motion.section key="comparador" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="grid gap-5 md:grid-cols-2">{comparisons.map((item) => <Card key={item.title}><CardContent className="p-6"><h2 className="mb-4 flex items-center text-2xl font-bold"><Scale className="mr-2 h-6 w-6" />{item.title}</h2><div className="grid gap-4"><div className="rounded-2xl bg-slate-100 p-4"><p className="font-semibold">Autor A</p><p className="mt-1 text-sm text-slate-700">{item.a}</p></div><div className="rounded-2xl bg-indigo-50 p-4"><p className="font-semibold">Autor B</p><p className="mt-1 text-sm text-slate-700">{item.b}</p></div></div></CardContent></Card>)}</motion.section>}
 
